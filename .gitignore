@@ -18,3 +18,4 @@ submission_baseline.csv
 submission_ready.csv
 submission_ready.zip
 model_report.json
+model_artifacts/

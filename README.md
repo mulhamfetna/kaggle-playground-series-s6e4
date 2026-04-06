@@ -1,95 +1,104 @@
-# Kaggle Playground Series S6E4 - Kaggle-First Brand Strategy
+# Kaggle Playground Series S6E4 - From Competition Model to Deployable API
 
-This repository is built for two goals at the same time:
+This repository demonstrates a full path from **Kaggle tabular modeling** to a **production-style inference service**.
 
-1. **Score competitively** in `playground-series-s6e4` (Predicting Irrigation Need).
-2. **Show proof-of-work publicly** to strengthen personal brand and attract high-value ML/Data projects.
+## What this project proves
 
-## Project Positioning
+1. Competitive ML workflow for `playground-series-s6e4` (Predicting Irrigation Need).
+2. Reproducible training pipeline with configurable compute budgets.
+3. Deployable serving layer (FastAPI + Docker), not just notebook experimentation.
 
-This is not a one-off submission repo. It is a **public technical portfolio artifact**:
-
-- Reproducible training scripts
-- Kaggle-ready notebook workflow
-- Submission guide
-- Strategy documentation for brand growth and distribution
-
-## Core Assets
+## Repository structure
 
 - `kaggle_gpu_submission_workflow.ipynb`  
-  End-to-end Kaggle notebook workflow (GPU), from data loading to submission file generation.
+  Kaggle Notebook workflow to train/evaluate and generate `submission_ready.csv`.
 
 - `train_advanced_and_submit.py`  
-  Advanced training pipeline with:
-  - CatBoost GPU path
-  - Configurable CV budget
-  - Multi-seed CatBoost ensembling
-  - JSON report generation
-
-- `train_and_submit.py`  
-  Baseline CatBoost training/submission script.
+  Advanced competition trainer (CatBoost + CV + optional search + report JSON).
 
 - `kaggle_submission_guide.md`  
-  Step-by-step submission process from Kaggle Notebook.
+  Step-by-step notebook submission guide.
 
-- `marketing-startgy/`  
-  Strategic documents for Kaggle-first authority building, distribution, and conversion.
+- `train_api_model.py`  
+  Trains a CPU CatBoost model and exports serving artifacts to `model_artifacts/`.
 
-## Competition Workflow (Recommended)
+- `app/main.py`  
+  FastAPI service with:
+  - `GET /health`
+  - `GET /schema`
+  - `POST /predict`
 
-1. Open Kaggle Notebook for this competition.
-2. Enable **GPU**.
-3. Run `kaggle_gpu_submission_workflow.ipynb`.
-4. Generate:
+- `Dockerfile` + `requirements.txt`  
+  Containerized API deployment stack.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    A[train.csv] --> B[Feature selection + categorical preprocessing]
+    B --> C[CatBoost training]
+    C --> D[Model artifact .cbm]
+    C --> E[Metadata JSON]
+    D --> F[FastAPI inference service]
+    E --> F
+    F --> G[/predict -> Irrigation_Need class/]
+```
+
+## Kaggle workflow
+
+1. Open the competition notebook environment.
+2. Run `kaggle_gpu_submission_workflow.ipynb`.
+3. Produce:
    - `/kaggle/working/submission_ready.csv`
    - `/kaggle/working/model_report.json`
-5. Submit from Kaggle output panel.
+4. Submit in competition UI.
 
-## Submission Quality Standard
+## API training and local serving
 
-Every submission should include:
+### 1) Install dependencies
 
-- Valid shape (270000 rows + required header)
-- Short experiment description
-- Logged config (iterations, seeds, CV setup)
-- Trackable result in leaderboard history
+```bash
+pip install -r requirements.txt
+```
 
-Suggested submission description template:
+### 2) Train and export API artifacts
 
-`GPU CatBoost multi-seed ensemble, balanced class weights, CV-checked configuration, full-train inference.`
+```bash
+python train_api_model.py --data-dir . --output-dir model_artifacts --iterations 700 --seed 42
+```
 
-## Brand Strategy Alignment
+### 3) Run FastAPI
 
-This repository supports a **Kaggle -> GitHub -> Client Trust** pipeline:
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
 
-1. **Kaggle:** Public metric performance and rank movement.
-2. **GitHub:** Clean code, reproducibility, and engineering rigor.
-3. **Authority:** Share notebooks, explain decisions, and publish technical insights.
-4. **Conversion:** Turn proof-of-work into consulting opportunities.
+### 4) Test endpoints
 
-## Operating Principles
+```bash
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8000/schema
+```
 
-- Prefer reproducible experiments over random tuning.
-- Use GPU-first settings to avoid runtime bottlenecks.
-- Submit fewer but higher-quality variants (daily limit aware).
-- Treat each notebook/script as a client-facing technical artifact.
+## Docker deployment
 
-## Repository Hygiene
+Build image (after generating `model_artifacts/`):
 
-Local-only and heavy runtime files are ignored via `.gitignore`:
+```bash
+docker build -t irrigation-api:latest .
+```
 
-- raw competition CSVs
-- local output CSV/report files
-- notebook checkpoints
-- virtual environments
+Run container:
 
-## Next Milestones
+```bash
+docker run --rm -p 8000:8000 irrigation-api:latest
+```
 
-- Add richer EDA/feature interpretation notebook sections.
-- Add experiment tracking table in report output.
-- Add model comparison narrative per submission wave.
-- Publish polished public notebook version for portfolio visibility.
+## Business framing
 
----
+This repo is designed as a public proof asset for ML/Data Engineering work:
 
-If you are reviewing this repository as a recruiter, founder, or technical lead: this project demonstrates practical tabular ML delivery under constrained competition settings, with reproducibility and communication designed for production-minded teams.
+- measurable leaderboard performance
+- reproducible experiments
+- deployable inference interface
+- clear operational documentation
