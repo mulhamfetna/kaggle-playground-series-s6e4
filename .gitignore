@@ -1,0 +1,20 @@
+# Python environments
+.venv/
+.venv-1/
+__pycache__/
+
+# Jupyter runtime artifacts
+.ipynb_checkpoints/
+
+# Local scratch notebooks/files
+Untitled.ipynb
+solve.ipynb
+
+# Competition data and local outputs
+train.csv
+test.csv
+sample_submission.csv
+submission_baseline.csv
+submission_ready.csv
+submission_ready.zip
+model_report.json
