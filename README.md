@@ -2,6 +2,14 @@
 
 This repository demonstrates a full path from **Kaggle tabular modeling** to a **production-style inference service**.
 
+## Skills demonstrated
+
+- Tabular machine learning with CatBoost, cross-validation and early stopping
+- Categorical feature preprocessing and feature selection
+- Model export with metadata for serving
+- REST API serving with FastAPI (`/health`, `/schema`, `/predict`)
+- Containerised deployment with Docker
+
 ## What this project proves
 
 1. Competitive ML workflow for `playground-series-s6e4` (Predicting Irrigation Need).
